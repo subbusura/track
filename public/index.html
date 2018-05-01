@@ -1,0 +1,90 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Socket.IO Chat Example</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="map"></div>
+
+
+
+    <script src="https://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC2-xe18tMisDXS1CDioMpaKZzlpZD5M_o&callback=initMap">
+    </script>
+    <script src="/socket.io/socket.io.js"></script>
+    <script>
+
+        var socket = io();
+        var mMap = null;
+        var markers = [];
+        var devices = [];
+
+
+        socket.on('new device', (data) => {
+
+            console.log('new Device added');
+
+        });
+
+        socket.on("location changed", (data) => {
+
+                console.log('received ',data);
+                devices=[];
+             //  let mda={ device: "test", location: { lat: 11.671177, lng: 78.116529 }};
+                devices.push(data);
+                updateLocation();
+
+        });
+
+        socket.on('reconnect', () => {
+
+           // socket.emit('device location',{ device: "test", location: { lat: 11.671177, lng: 78.116529 }});
+           socket.emit('device location','string');
+            console.log('conneced!');
+        })
+
+        socket.on('reconnect_error', () => {
+            console.log('attempt to reconnect has failed');
+        });
+
+
+        function initMap() {
+            var markers = [];
+            var uluru = { lat: 11.671177, lng: 78.116529 };
+            mMap = new google.maps.Map(document.getElementById('map'), {
+                zoom: 10,
+                center: uluru
+            });
+            updateLocation();
+        }
+
+        function updateLocation() {
+
+            if (mMap === null) {
+                console.log('google map is not init yet!');
+                return false;
+            }
+
+            for (let index = 0; index < devices.length; index++) {
+                const element = devices[index];
+
+                let m = new google.maps.Marker({
+                    position: devices[index].location,
+                    map: mMap,
+                    rotation: 9
+                });
+
+            }
+
+
+
+        }
+
+    </script>
+</body>
+
+</html>
